@@ -281,16 +281,17 @@ JS;
     /**
      * Building the options for UXON editor including filter function and error handler
      * 
-     * @param string $uxonSchema
+     * @param string $uxonSchemaJs
      * @param string $funcPrefix
      * @return string
      */
-    public static function buildJsUxonEditorOptions(string $editorIdJs, string $uxonSchema, string $funcPrefix, Workbench $workbench) : string
+    public static function buildJsUxonEditorOptions(string $editorIdJs, string $uxonSchemaJs, string $funcPrefix, Workbench $workbench) : string
     {   
         $trans = static::getTranslations($workbench);
+        $editorVar = trim($editorIdJs, "'") . '_JSONeditor';
         
         return <<<JS
-                    name: ({$uxonSchema} === 'generic' ? 'UXON' : {$uxonSchema}),
+                    name: ({$uxonSchemaJs} === 'generic' ? 'UXON' : {$uxonSchemaJs}),
                     enableTransform: false,
                     enableSort: false,
                     history: true,
@@ -403,7 +404,20 @@ JS;
                             });
                             
                             return items;
-                        } // onCreateMenu
+                        }, // onCreateMenu
+                        onClassName : function({ path, field, value }) {
+                            if (field && field.toLowerCase() === 'password') {
+                                setTimeout(function(){
+                                    var jqNode = $({$editorVar}.node.findNodeByPath(path).dom.value);
+                                    if (jqNode.is(':focus') === false) {
+                                        jqNode.text('•••••');
+                                        jqNode.one('focus', function(){this.innerText = ''});
+                                    }
+                                    jqNode.one('blur', function(){ $({$editorVar}.dom).data(this.innerText); this.innerText = '•••••';});
+                                }, 0);
+                                return 'exf-password';
+                            }
+                        } // onClassName
 JS;
     }
             
@@ -539,6 +553,8 @@ JS;
                     .uxoneditor-details-table {margin-bottom: 20px}
                     .uxoneditor-details-table th {font-weight: bold !important; padding: 3px !important; border-bottom: 1px solid #3883fa}
                     .uxoneditor-details-table td {padding: 3px !important;}
+
+                    .exf-password .jsoneditor-value {text-security: disc; --webkit-text-security: disc; -moz-text-security: disc;}
                     
 CSS;
     }
@@ -619,10 +635,6 @@ CSS;
             
             return <<<JS
                 
-        var wrapData = {};
-        var nodeIsWrappingTarget = false;
-        var hasArrayContext = false;
-        
         function {$funcPrefix}_fetchAutosuggest(text, path, input, uxon){
             var formData = new URLSearchParams({
         		action: 'exface.Core.UxonAutosuggest',
@@ -972,7 +984,11 @@ CSS;
             var path = node.getPath();
             var nodeType = {$funcPrefix}_getNodeType(node);
             var parentNodeType = {$funcPrefix}_getNodeType(node.parent);
-            
+            var wrapData = {};
+            var nodeIsWrappingTarget = false;
+            var hasArrayContext = false;
+        
+        
             // Wrap button enabled if node type is object
             if ( nodeType === 'object' || nodeType === 'root' ) {
                 nodeIsWrappingTarget = true;
@@ -1339,6 +1355,7 @@ JS;
                 $(function() {
             		$(document).on('blur', '#{$uxonEditorId} div.jsoneditor-field[contenteditable="true"]', {jsonEditor: {$uxonEditorId}_JSONeditor }, {$funcPrefix}_onBlur);
             	});
+
 JS;
     }
     
