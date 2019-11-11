@@ -113,7 +113,7 @@ class CommandLoader implements FacadeCommandLoaderInterface
                     $this->getWorkbench()->getLogger()->logException($err);
                     continue;
                 }
-                $namespace = str_replace(['/Actions', '/'], ['', $dot], $row['PATH_RELATIVE']);
+                $namespace = $this->getNamespace($row['PATH_RELATIVE']);
                 $alias = $namespace . $dot . $row['NAME'];
                 $this->cliActions[$this->getCommandNameFromAlias($alias)] = $alias;
             }
@@ -121,6 +121,24 @@ class CommandLoader implements FacadeCommandLoaderInterface
             // TODO load model action for command-prototypes
         }
         return $this->cliActions;
+    }
+    
+    /**
+     * 
+     * @param string $pathRelative
+     * @return string
+     */
+    protected function getNamespace(string $pathRelative) : string
+    {
+        $namespace = str_replace(['/Actions', '/'], ['', AliasSelectorInterface::ALIAS_NAMESPACE_DELIMITER], $pathRelative);
+        $parts = explode('.', $namespace);
+        foreach ($parts as $nr => $part) {
+            if ($nr === 0) {
+                continue;
+            }
+            $parts[$nr] = ucfirst($part);   
+        }
+        return implode('.', $parts);
     }
     
     /**
