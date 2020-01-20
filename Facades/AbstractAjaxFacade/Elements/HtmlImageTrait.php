@@ -13,8 +13,7 @@ use exface\Core\Facades\AbstractAjaxFacade\Interfaces\JsValueDecoratingInterface
  */
 trait HtmlImageTrait
 {
-    use JqueryAlignmentTrait;
-    
+       
     /**
      * 
      * @see AbstractJqueryElement::buildHtml()
