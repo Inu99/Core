@@ -46,7 +46,8 @@ use exface\Core\Widgets\Imagegallery;
  */
 trait JquerySlickGalleryTrait
 {
-      
+    private $slick_gallery_id = null;  
+    
     /**
      * Returns the HTML code of the carousel.
      * 
@@ -56,7 +57,7 @@ trait JquerySlickGalleryTrait
     {
         return <<<HTML
 
-<div id="{$this->getId()}" class="slick-carousel horizontal" style="height: 100%">
+<div id="{$this->getSlickGalleryId()}" class="slick-carousel horizontal" style="height: 100%">
     <!-- Slides will be placed here programmatically -->
 </div>
 	
@@ -89,7 +90,7 @@ JS;
 
 function {$this->buildJsFunctionPrefix()}_init(){
     
-    $("#{$this->getId()}").slick({
+    $("#{$this->getSlickGalleryId()}").slick({
         infinite: false,
         {$this->buildJsSlickOrientationOptions()}
         {$this->buildJsSlickOptions()}
@@ -178,5 +179,20 @@ JS;
     protected function buildCssHeightDefaultValue()
     {
         return ($this->getHeightRelativeUnit() * 6) . 'px';
+    }
+    
+    public function setSlickGalleryId(string $id) : self
+    {
+        $this->slick_gallery_id = $id;
+        return $this;
+    }
+    
+    protected function getSlickGalleryId() : string
+    {
+        if ($this->slick_gallery_id !== null){
+            return $this->slick_gallery_id;
+        } else {
+            return $this->getId();
+        }
     }
 }
