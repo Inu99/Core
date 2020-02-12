@@ -88,23 +88,49 @@ JS;
     {
         $output = <<<JS
 
-function {$this->buildJsFunctionPrefix()}_init(){
-    
-    $("#{$this->getSlickGalleryId()}").slick({
-        infinite: false,
-        {$this->buildJsSlickOrientationOptions()}
-        {$this->buildJsSlickOptions()}
-    });
-
+function {$this->buildJsCarouselInitFunctionName()}(){
+    {$this->buildJsCarouselInitFunctionBody()}
 }
 
-function {$this->buildJsFunctionPrefix()}_load(){
-	{$this->buildJsDataSource()}
+function {$this->buildJsCarouselLoadFunctionName()}(){
+	{$this->buildJsCarouselLoadFunctionBody()}
 }
 
 JS;
         
         return $output;
+    }
+    
+    protected function buildJsCarouselInitFunctionName() : string
+    {
+        return $this->buildJsFunctionPrefix() . '_init';
+    }
+    
+    protected function buildJsCarouselInitFunctionBody() : string
+    {
+        return <<<JS
+            
+        $("#{$this->getSlickGalleryId()}").slick({
+            infinite: false,
+            {$this->buildJsSlickOrientationOptions()}
+            {$this->buildJsSlickOptions()}
+        });
+
+JS;
+    }
+    
+    protected function buildJsCarouselLoadFunctionName() : string
+    {
+        return $this->buildJsFunctionPrefix() . '_load';
+    }
+    
+    protected function buildJsCarouselLoadFunctionBody() : string
+    {
+        return <<<JS
+        
+        {$this->buildJsDataSource()}
+
+JS;
     }
     
     /**
@@ -194,5 +220,12 @@ JS;
         } else {
             return $this->getId();
         }
+    }
+        
+    public function buildJsFunctionPrefix()
+    {
+        
+        return str_replace($this->getFacade()->getConfig()->getOption('FORBIDDEN_CHARS_IN_FUNCTION_PREFIX')->toArray(), '_', $this->getSlickGalleryId()) . '_';
+
     }
 }
